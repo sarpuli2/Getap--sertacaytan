@@ -1,0 +1,51 @@
+{% load static %}
+{% block content %} 
+
+<body style="background-color: #bbbbbb;">
+    <div style="width: 70%; margin: auto;">
+        <div class="card mt-5" >
+            <div class="card-header">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Çıkış</button>
+                </form>
+                <br/>
+                <h1>{{ user_name }} {{ user_surname }} - Stajyer Bilgi Kayıt</h1>
+            </div>
+            <div class="card-body" >
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        Bölüm: {{ form.bolum }}
+                    </div>
+                    <div class="form-group">
+                        Lisans programı: {{ form.kacyillik }}
+                    </div>
+                    <div class="form-group">
+                        Durumu: {{ form.tamamdevam }}
+                    </div>
+                    <div class="form-group">
+                        Dönem süresi: {{ form.donem }}
+                    </div>              
+                    <div class="form-group">
+                        Cinsiyet: {{ form.cinsiyet }}
+                    </div>
+                    <div class="form-group">
+                        Telefon: {{ form.telefon }}
+                    </div>
+                    <div class="form-group">
+                        Mail: {{ form.mail }}
+                    </div>
+                    <div class="form-group">
+                        Biografi: {{ form.biografi }}
+                    </div>
+                    <div class="form-group">
+                            Aktif: {{ form.aktif }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Gönder</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+    {% endblock %}
