@@ -1,12 +1,50 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.conf import settings
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.contrib import messages
-from .forms import Kullaniciveri
-from .models import Register, Anasayfa
+from django.template.loader import render_to_string
+from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import logout
 from django.http import HttpResponse
-from .models import Anasayfa 
+from .models import Register, Anasayfa
+from .forms import Kullaniciveri
+from .tokens import hesaponaytoken
+
+def email_gonderme(user, request):
+    current_site = get_current_site(request)
+    mail_subject = 'Hesap Aktivasyonu'
+    message = render_to_string('email_gonderme.html', {
+        'user': user,
+        'domain': current_site.domain,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': hesaponaytoken.make_token(user),
+    })
+    send_mail(
+        mail_subject,
+        message,
+        'admin@example.com',
+        [user.mail],
+        fail_silently=False,
+    )
+
+def activate(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = Register.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, Register.DoesNotExist):
+        user = None
+
+    if user is not None and hesaponaytoken.check_token(user, token):
+        user.aktifmi = True
+        user.save()
+        request.session['user_id'] = user.id
+        request.session['user_name'] = user.name
+        request.session['user_surname'] = user.surname
+        request.session['user_mail'] = user.mail
+        return redirect('anasayfa')
+    else:
+        return render(request, 'login.html', {'warning': 'Lütfen Emailinizi doğrulayın.'})
 
 def register_view(request):
     if request.method == 'POST':
@@ -20,9 +58,10 @@ def register_view(request):
             if Register.objects.filter(mail=mail).exists():
                 messages.error(request, 'Böyle bir Email zaten var.')
             else:
-                register = Register(name=name, surname=surname, mail=mail, password=password, password2=password2)
+                register = Register(name=name, surname=surname, mail=mail, password=password, password2=password2, aktifmi=False)
                 register.save()
-                messages.success(request, 'Kayıt Başarılı')
+                messages.success(request, 'Kayıt Başarılı! Hesabınızı onaylamak için Emailinize gelen bağlantıya tıklayınız.')
+                email_gonderme(register, request)
                 return redirect('login')
         else:
             messages.error(request, 'Şifreler eşleşmiyor!')
@@ -36,13 +75,15 @@ def login_view(request):
         
         user = Register.objects.filter(mail=mail, password=password).first()
         if user is not None:
-            request.session['user_id'] = user.id
-            request.session['user_name'] = user.name
-            request.session['user_surname'] = user.surname
-            request.session['user_mail'] = user.mail
-            
-            messages.success(request, 'Login successful')
-            return redirect('anasayfa')
+            if user.aktifmi:
+                request.session['user_id'] = user.id
+                request.session['user_name'] = user.name
+                request.session['user_surname'] = user.surname
+                request.session['user_mail'] = user.mail
+                messages.success(request, 'Giriş Başarılı!.')
+                return redirect('anasayfa')
+            else:
+                messages.warning(request, 'Lütfen mailinizi onaylayınız!')
         else:
             messages.error(request, 'Kullanıcı adı veya şifre yanlış!')
     
@@ -63,31 +104,10 @@ def anasayfa_view(request):
         if request.method == 'POST':
             form = Kullaniciveri(request.POST)
             if form.is_valid():
-                bolum = form.cleaned_data['bolum']
-                kacyillik = form.cleaned_data['kacyillik']
-                tamamdevam = form.cleaned_data['tamamdevam']
-                donem = form.cleaned_data['donem']
-                biografi = form.cleaned_data['biografi']
-                cinsiyet = form.cleaned_data['cinsiyet']
-                telefon = form.cleaned_data['telefon']
-                mail = form.cleaned_data['mail']
-                aktif = form.cleaned_data['aktif']
-
-                anasayfa_entry = Anasayfa(
-                    user_id=user_id,
-                    name=user_name,
-                    bolum=bolum,
-                    kacyillik=kacyillik,
-                    tamamdevam=tamamdevam,
-                    donem=donem,
-                    biografi=biografi,
-                    cinsiyet=cinsiyet,
-                    telefon=telefon,
-                    mail=mail,
-                    aktif=aktif
-                )
+                anasayfa_entry = form.save(commit=False)
+                anasayfa_entry.user_id = user_id
+                anasayfa_entry.name = user_name
                 anasayfa_entry.save()
-
                 messages.success(request, 'İletişim bilgileri başarıyla kaydedildi.')
                 return redirect('anasayfa')
             else:
@@ -96,13 +116,6 @@ def anasayfa_view(request):
             form = Kullaniciveri()
 
         return render(request, 'anasayfa.html', {'form': form, 'user_name': user_name, 'user_surname': user_surname})
-
-def delete_view(request, id):
-    obj = get_object_or_404(Anasayfa, id=id)
-    if request.method == 'POST':
-        obj.delete()
-        return redirect('anasayfa')  
-    return HttpResponse('Silme işlemi başarısız oldu.')
 
 def update_view(request, id):
     anasayfa_entry = get_object_or_404(Anasayfa, id=id)
@@ -121,6 +134,14 @@ def update_view(request, id):
         form = Kullaniciveri(instance=anasayfa_entry)
 
     return render(request, 'update.html', {'form': form})
+
+def delete_view(request, id):
+    obj = get_object_or_404(Anasayfa, id=id)
+    if request.method == 'POST':
+        obj.delete()
+        messages.success(request, 'Veri başarıyla silindi.')
+        return redirect('anasayfa')
+    return HttpResponse('Silme işlemi başarısız oldu.')
 
 def logout_view(request):
     logout(request)

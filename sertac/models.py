@@ -8,6 +8,7 @@ class Register(models.Model):
     mail = models.EmailField()
     password = models.CharField(max_length=50)
     password2 = models.CharField(max_length=50)
+    aktifmi = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
         
     def __str__(self):
