@@ -7,7 +7,7 @@ from .models import Anasayfa
 class Kullaniciveri(forms.ModelForm):
     class Meta:
         model = Anasayfa
-        fields = ['bolum', 'kacyillik', 'tamamdevam', 'donem', 'biografi', 'cinsiyet', 'telefon', 'mail', 'aktif']
+        fields = ['image','bolum', 'kacyillik', 'tamamdevam', 'donem', 'biografi', 'cinsiyet', 'telefon', 'mail', 'aktif']
 
     def __init__(self, *args, **kwargs):
         super(Kullaniciveri, self).__init__(*args, **kwargs)

@@ -8,3 +8,12 @@ class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
         )
 
 hesaponaytoken = AccountActivationTokenGenerator()
+
+class CustomPasswordResetTokenGenerator(PasswordResetTokenGenerator):
+    def _make_hash_value(self, user, timestamp):
+
+        return (
+            six.text_type(user.pk) + user.password + six.text_type(timestamp)
+        )
+
+passwordreflesh = CustomPasswordResetTokenGenerator()

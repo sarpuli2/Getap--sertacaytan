@@ -17,6 +17,7 @@ class Register(models.Model):
 class Anasayfa(models.Model):
     id = models.AutoField(primary_key=True)
     user_id = models.IntegerField()
+    image = models.ImageField(null=True, blank=True)
     name = models.CharField(max_length=50)
     bolum = models.CharField(max_length=50)
     kacyillik_choices = [

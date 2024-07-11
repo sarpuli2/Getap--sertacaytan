@@ -9,7 +9,14 @@ from django.contrib.auth import logout
 from django.http import HttpResponse
 from .models import Register, Anasayfa
 from .forms import Kullaniciveri
-from .tokens import hesaponaytoken
+from .tokens import hesaponaytoken, passwordreflesh
+from django.contrib.auth.views import PasswordResetView, PasswordResetCompleteView, PasswordResetConfirmView, PasswordResetDoneView
+from django.urls import reverse_lazy
+from django.contrib.auth import update_session_auth_hash
+from . import utils
+from .utils import email_gonderme_SifreIcın
+from django.contrib.auth.hashers import make_password
+
 
 def email_gonderme(user, request):
     current_site = get_current_site(request)
@@ -19,6 +26,23 @@ def email_gonderme(user, request):
         'domain': current_site.domain,
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
         'token': hesaponaytoken.make_token(user),
+    })
+    send_mail(
+        mail_subject,
+        message,
+        'admin@example.com',
+        [user.mail],
+        fail_silently=False,
+    )
+
+def email_gonderme_SifreIcın(user, request):
+    current_site = get_current_site(request)
+    mail_subject = 'Şifre Yenileme'
+    message = render_to_string('email_gonderme_sifreicin.html', {
+        'user': user,
+        'domain': current_site.domain,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': passwordreflesh.make_token(user),
     })
     send_mail(
         mail_subject,
@@ -45,6 +69,34 @@ def activate(request, uidb64, token):
         return redirect('anasayfa')
     else:
         return render(request, 'login.html', {'warning': 'Lütfen Emailinizi doğrulayın.'})
+    
+def passwordchange(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = Register.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, Register.DoesNotExist):
+        user = None
+    
+    if user is not None and passwordreflesh.check_token(user, token):
+        if request.method == 'POST':
+            password = request.POST.get('password')
+            password2 = request.POST.get('password2')
+
+            if password == password2:
+                user.password = password
+                user.password2 = password2
+                user.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Şifreniz başarıyla değiştirildi.')
+                return redirect('login') 
+            else:
+                return render(request, 'sifreyenileme/changepassword.html', {'warning': 'Şifreler eşleşmiyor.'})
+        
+ 
+        return render(request, 'sifreyenileme/changepassword.html', {'uidb64': uidb64, 'token': token})
+    
+    else:
+        return render(request, 'login.html', {'warning': 'Geçersiz istek veya bağlantı süresi aşımı.'})
 
 def register_view(request):
     if request.method == 'POST':
@@ -102,7 +154,7 @@ def anasayfa_view(request):
         return redirect('update', id=anasayfa_entry.id)
     except Anasayfa.DoesNotExist:
         if request.method == 'POST':
-            form = Kullaniciveri(request.POST)
+            form = Kullaniciveri(request.POST, request.FILES)
             if form.is_valid():
                 anasayfa_entry = form.save(commit=False)
                 anasayfa_entry.user_id = user_id
@@ -119,19 +171,14 @@ def anasayfa_view(request):
 
 def update_view(request, id):
     anasayfa_entry = get_object_or_404(Anasayfa, id=id)
+    form = Kullaniciveri(instance=anasayfa_entry)
+    
     if request.method == 'POST':
-        if 'update' in request.POST:
-            form = Kullaniciveri(request.POST, instance=anasayfa_entry)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Veri başarıyla güncellendi.')
-                return redirect('anasayfa')
-        elif 'delete' in request.POST:
-            anasayfa_entry.delete()
-            messages.success(request, 'Veri başarıyla silindi.')
+        form = Kullaniciveri(request.POST, request.FILES, instance=anasayfa_entry)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Veri başarıyla güncellendi.')
             return redirect('anasayfa')
-    else:
-        form = Kullaniciveri(instance=anasayfa_entry)
 
     return render(request, 'update.html', {'form': form})
 
@@ -146,3 +193,36 @@ def delete_view(request, id):
 def logout_view(request):
     logout(request)
     return redirect('login')
+ 
+#şifre yenileme sertaç bişiler deniyo
+
+def sendpasswordkey_view(request):
+    if request.method == 'POST':
+        mail = request.POST.get('mail')  # Bu satırı düzelttik
+        user = Register.objects.filter(mail=mail).first()
+
+        if user:
+            messages.success(request, 'Email başarılı şekilde gönderildi lütfen mailinizi kontrol ediniz.')
+            email_gonderme_SifreIcın(user, request)
+            return redirect('login')
+        else:
+            messages.error(request, 'Böyle bir Email sisteme kayıtlı değil! Lütfen tekrar deneyiniz.')
+            return redirect('sendmail')
+    else:
+        return render(request, 'sifreyenileme/sendmail.html') 
+#şifre yenileme django not working
+
+# class CustomPasswordResetView(PasswordResetView):
+#     template_name = 'registration/password_reset_form.html'
+#     email_template_name = 'registration/password_reset_email.html'
+#     success_url = reverse_lazy('password_reset_done')
+
+# class CustomPasswordResetDoneView(PasswordResetDoneView):
+#     template_name = 'registration/password_reset_done.html'
+
+# class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+#     template_name = 'registration/password_reset_confirm.html'
+#     success_url = reverse_lazy('password_reset_complete')
+
+# class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+#     template_name = 'registration/password_reset_complete.html'
