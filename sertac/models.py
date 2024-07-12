@@ -14,12 +14,21 @@ class Register(models.Model):
     def __str__(self):
         return f'{self.name} {self.surname}'
     
-class Anasayfa(models.Model):
+    @property
+    def is_authenticated(self):
+        return True
+    
+class Stajyerinfo(models.Model):
     id = models.AutoField(primary_key=True)
     user_id = models.IntegerField()
     image = models.ImageField(null=True, blank=True)
     name = models.CharField(max_length=50)
     bolum = models.CharField(max_length=50)
+    dal_choices = [
+        ('Front-End', 'Front-End'),
+        ('Back-End', 'Back-End')
+    ]
+    dal = models.CharField(max_length=20, choices=dal_choices)
     kacyillik_choices = [
         ('lisans', 'Lisans (4 yıl)'),
         ('onlisans', 'Önlisans (2 yıl)')

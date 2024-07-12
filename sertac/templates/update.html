@@ -1,4 +1,6 @@
+{% extends "base.html" %}
 {% load static %}
+
 {% load crispy_forms_tags %}
 {% block content %}
 <head>
@@ -6,16 +8,13 @@
     <title>Bilgi Güncelle</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
+
 <body style="background-color: #bbbbbb;">
     <div style="width: 70%; margin: auto;">
         <div class="card mt-5">
             <div class="card-header">
                 <h1>{{ user_name }} {{ user_surname }} - Stajyer Bilgi Kayıt</h1>
             </div>
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary">Çıkış</button>
-            </form>
             <div class="card-body">           
                 {% if form.instance.image %}
                     <img src="{{ form.instance.image.url }}" class="img-responsive" width="100px" height="100px">

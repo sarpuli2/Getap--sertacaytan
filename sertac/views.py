@@ -7,15 +7,14 @@ from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import logout
 from django.http import HttpResponse
-from .models import Register, Anasayfa
+from .models import Register, Stajyerinfo
 from .forms import Kullaniciveri
 from .tokens import hesaponaytoken, passwordreflesh
-from django.contrib.auth.views import PasswordResetView, PasswordResetCompleteView, PasswordResetConfirmView, PasswordResetDoneView
 from django.urls import reverse_lazy
 from django.contrib.auth import update_session_auth_hash
 from . import utils
 from .utils import email_gonderme_SifreIcın
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.decorators import login_required
 
 
 def email_gonderme(user, request):
@@ -66,7 +65,7 @@ def activate(request, uidb64, token):
         request.session['user_name'] = user.name
         request.session['user_surname'] = user.surname
         request.session['user_mail'] = user.mail
-        return redirect('anasayfa')
+        return redirect('stajyerinfo')
     else:
         return render(request, 'login.html', {'warning': 'Lütfen Emailinizi doğrulayın.'})
     
@@ -132,6 +131,7 @@ def login_view(request):
                 request.session['user_name'] = user.name
                 request.session['user_surname'] = user.surname
                 request.session['user_mail'] = user.mail
+                request.session['is_authenticated'] = True
                 messages.success(request, 'Giriş Başarılı!.')
                 return redirect('anasayfa')
             else:
@@ -141,7 +141,7 @@ def login_view(request):
     
     return render(request, 'login.html')
 
-def anasayfa_view(request):
+def stajyerinfo_view(request):
     user_id = request.session.get('user_id')
     if not user_id:
         return redirect('login')
@@ -150,44 +150,44 @@ def anasayfa_view(request):
     user_surname = request.session.get('user_surname')
 
     try:
-        anasayfa_entry = Anasayfa.objects.get(user_id=user_id)
-        return redirect('update', id=anasayfa_entry.id)
-    except Anasayfa.DoesNotExist:
+        stajyerinfo_entry = Stajyerinfo.objects.get(user_id=user_id)
+        return redirect('update', id=stajyerinfo_entry.id)
+    except Stajyerinfo.DoesNotExist:
         if request.method == 'POST':
             form = Kullaniciveri(request.POST, request.FILES)
             if form.is_valid():
-                anasayfa_entry = form.save(commit=False)
-                anasayfa_entry.user_id = user_id
-                anasayfa_entry.name = user_name
-                anasayfa_entry.save()
+                stajyerinfo_entry = form.save(commit=False)
+                stajyerinfo_entry.user_id = user_id
+                stajyerinfo_entry.name = user_name
+                stajyerinfo_entry.save()
                 messages.success(request, 'İletişim bilgileri başarıyla kaydedildi.')
-                return redirect('anasayfa')
+                return redirect('stajyerinfo')
             else:
                 messages.error(request, 'Form geçerli değil: ' + str(form.errors))
         else:
             form = Kullaniciveri()
 
-        return render(request, 'anasayfa.html', {'form': form, 'user_name': user_name, 'user_surname': user_surname})
+        return render(request, 'stajyerinfo.html', {'form': form, 'user_name': user_name, 'user_surname': user_surname})
 
 def update_view(request, id):
-    anasayfa_entry = get_object_or_404(Anasayfa, id=id)
-    form = Kullaniciveri(instance=anasayfa_entry)
+    stajyerinfo_entry = get_object_or_404(Stajyerinfo, id=id)
+    form = Kullaniciveri(instance=stajyerinfo_entry)
     
     if request.method == 'POST':
-        form = Kullaniciveri(request.POST, request.FILES, instance=anasayfa_entry)
+        form = Kullaniciveri(request.POST, request.FILES, instance=stajyerinfo_entry)
         if form.is_valid():
             form.save()
             messages.success(request, 'Veri başarıyla güncellendi.')
-            return redirect('anasayfa')
+            return redirect('stajyerinfo')
 
     return render(request, 'update.html', {'form': form})
 
 def delete_view(request, id):
-    obj = get_object_or_404(Anasayfa, id=id)
+    obj = get_object_or_404(Stajyerinfo, id=id)
     if request.method == 'POST':
         obj.delete()
         messages.success(request, 'Veri başarıyla silindi.')
-        return redirect('anasayfa')
+        return redirect('stajyerinfo')
     return HttpResponse('Silme işlemi başarısız oldu.')
 
 def logout_view(request):
@@ -226,3 +226,30 @@ def sendpasswordkey_view(request):
 
 # class CustomPasswordResetCompleteView(PasswordResetCompleteView):
 #     template_name = 'registration/password_reset_complete.html'
+
+#@login_required
+def anasayfa_view(request):
+    user_id = request.session.get('user_id')
+    if user_id:
+        userinfo = Stajyerinfo.objects.filter(user_id=user_id).first()
+        if userinfo:
+            dal = userinfo.dal
+            return render(request, 'anasayfa.html', {'example': dal})
+        else:
+            return render(request, 'anasayfa.html', {'example': 'Stajyer'})
+    else:
+        return render(request, 'anasayfa.html', {'example': 'Stajyer'})
+
+def profil_view(request):
+    user_id = request.session.get('user_id')
+    profil_entry = get_object_or_404(Register, id=user_id)
+    form = Kullaniciveri(instance=profil_entry)
+    
+    if request.method == 'POST':
+        form = Kullaniciveri(request.POST, instance=profil_entry)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Veri başarıyla güncellendi.')
+            return redirect('profil')
+
+    return render(request, 'profil.html', {'form': form})

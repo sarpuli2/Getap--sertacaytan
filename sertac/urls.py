@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import register_view, login_view, anasayfa_view, activate, passwordchange
+from .views import register_view, login_view, stajyerinfo_view, anasayfa_view, activate, passwordchange
 from . import views
 from django.conf.urls.static import static
 from django.conf import settings
@@ -10,9 +10,11 @@ from .views import *
 urlpatterns = [
     path('register/', register_view, name='register'),
     path('login/', login_view, name='login'),
-    path('', login_view, name='login'),
+    path('', anasayfa_view, name='anasayfa'),
     path('activate/<uidb64>/<token>/', activate, name='activate'),
+    path('stajyerinfo/', stajyerinfo_view, name='stajyerinfo'),
     path('anasayfa/', anasayfa_view, name='anasayfa'),
+    path('profil/', profil_view, name='profil'),
     path('update/<int:id>/', views.update_view, name='update'),
     path('delete/<int:id>/', views.delete_view, name='delete'),
     path('logout/', views.logout_view, name='logout'),
