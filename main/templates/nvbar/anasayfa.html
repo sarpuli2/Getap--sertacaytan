@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Anasayfa{% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Django Blog</title>
+    <link rel="stylesheet" href="{% static 'css/hello.css' %}">
+</head>
+<div class="container mt-4"> 
+    <div class="row">
+        <div class="hello">
+            {% if request.session.is_authenticated %}
+                {% if request.session.user_yetki == 'Admin' %}
+                  <h3>Yetkili Yazılımcı.</h3>
+                {% else %}
+                  <h3>{{ example }} Yazılımcı.</h3>
+                {% endif %}
+            {% else %}
+                <h3>Stajyer yazılımcı.</h3>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+

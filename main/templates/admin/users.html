@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Profil</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Sıra</th>
+                    <th scope="col">İsim</th>
+                    <th scope="col">Soyisim</th>
+                    <th scope="col">Stajyer Profil Detay</th>
+                    <th scope="col">Stajyer Bilgi Detay</th>
+                    <th scope="col">Kullanıcı Sil</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.surname }}</td>
+                    <td><a href="{% url 'user_profile_detail' user.id %}" class="btn btn-primary">Stajyer Profil Detay</a></td>
+                    <td><a href="{% url 'user_detail' user.id %}" class="btn btn-primary">Stajyer Bilgi Detay</a></td>
+                    <td>
+                        <form method="post" action="{% url 'user_delete' user.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?');">Kullanıcı Sil</button>
+                        </form>
+                    </td> 
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+{% endblock %}
