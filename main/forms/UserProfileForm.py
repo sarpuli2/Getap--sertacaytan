@@ -5,7 +5,7 @@ from django.utils import timezone
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = Register
-        fields = ['name', 'surname', 'mail', 'password', 'password2', 'aktifmi']
+        fields = ['image', 'name', 'surname', 'mail', 'password', 'password2', 'aktifmi']
         widgets = {
             'password': forms.PasswordInput(),
             'password2': forms.PasswordInput(),

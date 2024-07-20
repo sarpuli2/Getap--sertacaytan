@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Görev Atama{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <h3>Stajyerler</h3>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-check">
+                    <input type="checkbox" id="select_all" class="form-check-input">
+                    <label for="select_all" class="form-check-label">Tümünü Seç</label>
+                </div>
+                {% for kullanici in kullanicilar %}
+                {% if kullanici.yetki == 'User' %}
+                <div class="form-check">
+                    <input type="checkbox" name="selected_users" value="{{ kullanici.id }}" class="form-check-input user-checkbox">
+                    <label class="form-check-label">{{ kullanici.name }} {{ kullanici.surname }}</label>
+                </div>
+                {% endif %}
+                {% endfor %}
+        </div>
+        <div class="col-md-8">
+            <h3>Görev Detayları</h3>
+            <div class="form-group">
+                <label for="taskname">Görev Adı:</label>
+                <input type="text" id="taskname" name="taskname" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="taskcontent">Görev Açıklaması:</label>
+                <textarea id="taskcontent" name="taskcontent" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="taskimage">Görev Resmi (zorunlu değil):</label>
+                <input type="file" id="taskimage" name="taskimage" class="form-control-file">
+            </div>
+            <div class="form-group">
+                <label for="taskfile">Görev Dosyası (zorunlu değil):</label>
+                <input type="file" id="taskfile" name="taskfile" class="form-control-file">
+            </div>
+            <button type="submit" class="btn btn-primary">Görev Ver</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('select_all').addEventListener('click', function(event) {
+    var checkboxes = document.querySelectorAll('.user-checkbox');
+    for (var checkbox of checkboxes) {
+        checkbox.checked = event.target.checked;
+    }
+});
+</script>
+{% endblock %}

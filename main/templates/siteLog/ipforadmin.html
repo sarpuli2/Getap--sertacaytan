@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - Kullanıcı Girişleri</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script type="text/javascript">
+        function confirmDelete() {
+            return confirm('Silmek istediğinize emin misiniz?');
+        }
+    </script>
+</head>
+<body>
+<br/>
+    <form action="{% url 'iplogsıfırla' %}" method="post" onsubmit="return confirmDelete();">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Sıfırla</button>
+    </form>
+    <h1>Kullanıcı Girişleri</h1>
+    <table border="1" class="table">
+        <thead>
+            <tr>
+                <th>Kullanıcı</th>
+                <th>IP Adresi</th>
+                <th>Giriş Zamanı</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for userlogin in userlogins %}
+            <tr>
+                <td>{{ userlogin.user.name }} {{ userlogin.user.surname }}</td>
+                <td>{{ userlogin.ip_address }}</td>
+                <td>{{ userlogin.login_time }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+{% endblock %}

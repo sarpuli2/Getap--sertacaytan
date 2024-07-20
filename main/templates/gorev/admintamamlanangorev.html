@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <h1>Tamamlanan Görevler</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Kullanıcı</th>
+                <th>Görev</th>
+                <th>Yüklenen Dosya</th>
+                <th>Yüklenen Açıklama</th>
+                <th>Yüklenen GitHub Linki</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tamamlanan_gorev in tamamlanan_gorevler %}
+                <tr id="gorev-{{ tamamlanan_gorev.id }}">
+                    <td>{{ tamamlanan_gorev.user.name }} {{ tamamlanan_gorev.user.surname }}</td>
+                    <td>{{ tamamlanan_gorev.gorev.taskname }}</td>
+                    <td>
+                        {% if tamamlanan_gorev.file %}
+                            <a href="{{ tamamlanan_gorev.file.url }}">Dosyayı Görüntüle</a>
+                        {% else %}
+                            Yok
+                        {% endif %}
+                    </td>
+                    <td>{{ tamamlanan_gorev.description }}</td>
+                    <td>
+                        {% if tamamlanan_gorev.github_link %}
+                            <a href="{{ tamamlanan_gorev.github_link }}" target="_blank">GitHub Linki</a>
+                        {% else %}
+                            Yok
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteGorev({{ tamamlanan_gorev.id }})">Sil</button>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Hiç tamamlanan görev yok.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function deleteGorev(gorevId) {
+    if (confirm('Bu görevi silmek istediğinizden emin misiniz?')) {
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ gorev_id: gorevId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('gorev-' + gorevId).remove();
+            } else {
+                alert('Görev silinemedi. Lütfen tekrar deneyin.');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

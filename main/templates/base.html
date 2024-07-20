@@ -1,44 +1,56 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>{% block title %}Stajyer Bilgi{% endblock %}</title>
-        <link rel="stylesheet" href="{% static 'css/animate.css' %}">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-        {% block extra_head %}{% endblock %}
-    </head>
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Stajyer Bilgi{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    {% block extra_head %}{% endblock %}
+</head>
 <body>
     <header>
         <nav class="navbar">
-            <img src="/static/getap-logo.b907d94f.webp" class="l-dark" height="40" alt="">
+            <img src="{% static 'getap-logo.b907d94f.webp' %}" class="l-dark" height="40" alt="" title="Instagram:@sertcaytan">
+            {% if special_day %}
+                <img src="{% static 'ataturk.png' %}" class="l-dark" height="40" alt="" title="Instagram:@sertcaytan">
+            {% endif %}
             <input type="checkbox" id="toggler">
             <label for="toggler"><i class="fa fa-bars"></i></label>
             <div class="menu">
-              <ul class="list">
-                <li class="item"><a href="{% url 'anasayfa' %}">Anasayfa</a></li>
-                {% if request.session.is_authenticated %}
-                    {% if request.session.user_yetki == 'Admin' %}
-                      <li><a href="{% url 'users_list' %}">Stajyerler</a></li>
+                <ul class="list">
+                    <li class="item"><a href="{% url 'anasayfa' %}">Anasayfa</a></li>
+                    {% if request.session.is_authenticated %}
+                        {% if request.session.user_yetki == 'Admin' or request.session.user_yetki == 'Kurucu' %}
+                            <li><a href="{% url 'users_list' %}">Stajyerler</a></li>
+                            <li><a href="{% url 'admin_gorev_ver' %}">Görev Ver</a></li>
+                            <li><a href="{% url 'admin_tamamlanan_gorevler' %}">Tamamlanan Görevler</a></li>
+                            {% if request.session.user_yetki == 'Kurucu' %} 
+                                <li><a href="{% url 'ipforadmin_list' %}">Kullanıcı Giriş Log</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li><a href="{% url 'stajyerinfo' %}">Staj Kayıt Gir</a></li>
+                            {% if request.session.user_id %}
+                                <li><a href="{% url 'kullanicigorevler' request.session.user_id %}">Görevim</a></li>
+                            {% else %}
+                                <li><a href="#">Görevim</a></li>
+                            {% endif %}
+                        {% endif %}                                     
+                        <li><a href="{% url 'profil' %}">Profil</a></li>
+                        <li><a href="{% url 'logout' %}">Çıkış</a></li>
                     {% else %}
-                      <li><a href="{% url 'stajyerinfo' %}">Staj Kayıt Gir</a></li>
+                        <li><a href="{% url 'login' %}">Giriş</a></li>
+                        <li><a href="{% url 'register' %}">Kayıt</a></li>
                     {% endif %}
-                    <li><a href="{% url 'profil' %}">Profil</a></li>
-                    <li><a href="{% url 'logout' %}">Çıkış</a></li>
-                {% else %}
-                    <li><a href="{% url 'login' %}">Giriş</a></li>
-                    <li><a href="{% url 'register' %}">Kayıt</a></li>
-                {% endif %}
-              </ul>
+                </ul>
             </div>
-          </nav>
+        </nav>
     </header>
 
     <main>
         {% block content %}
-        <!-- İçerik burada görüntülenecek -->
         {% endblock %}
     </main>
 

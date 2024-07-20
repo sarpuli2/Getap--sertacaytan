@@ -1,64 +1,56 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block content %} 
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-</head>
+{% block content %}
 <body style="background-color: #bbbbbb;">
-    <div style="width: 70%; margin: auto;">
-        <div class="card mt-5" >
-            <div class="card-header"> 
-                <br/>
-                <h1>{{ user_name }} {{ user_surname }} - Stajyer Bilgi Kayıt</h1>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header">
+                <h1>Stajyer Bilgi Kayıt</h1>
             </div>
-            <div class="card-body" >
-                {% if form.instance.image %}
-                {% csrf_token %}    
-                    <img src="{{ form.instance.image.url }}" class="img-responsive" width="100px" height="100px">
-                {% else %}
-                    <p>Profil resmi yüklenmemiş.</p>
-                {% endif %}
-                <p>Profil Resmi Değiştir</p>
+            <div class="card-body">
                 <form method="post" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
                     <div class="form-group">
-                        Profil Resmi: {{ form.image }}
+                        <label for="id_bolum">Bölüm:</label>
+                        {{ form.bolum }}
                     </div>
                     <div class="form-group">
-                        Bölüm: {{ form.bolum }}
+                        <label for="id_kacyillik">Lisans programı:</label>
+                        {{ form.kacyillik }}
                     </div>
                     <div class="form-group">
-                        Lisans programı: {{ form.kacyillik }}
+                        <label for="id_tamamdevam">Durumu:</label>
+                        {{ form.tamamdevam }}
                     </div>
                     <div class="form-group">
-                        Durumu: {{ form.tamamdevam }}
+                        <label for="id_dal">İlgili olduğu alan:</label>
+                        {{ form.dal }}
                     </div>
                     <div class="form-group">
-                        İlgili olduğu alan: {{ form.dal }}
+                        <label for="id_donem">Dönem süresi:</label>
+                        {{ form.donem }}
                     </div>
                     <div class="form-group">
-                        Dönem süresi: {{ form.donem }}
-                    </div>              
-                    <div class="form-group">
-                        Cinsiyet: {{ form.cinsiyet }}
+                        <label for="id_cinsiyet">Cinsiyet:</label>
+                        {{ form.cinsiyet }}
                     </div>
                     <div class="form-group">
-                        Telefon: {{ form.telefon }}
+                        <label for="id_telefon">Telefon:</label>
+                        {{ form.telefon }}
                     </div>
                     <div class="form-group">
-                        Mail: {{ form.mail }}
+                        <label for="id_mail">Mail:</label>
+                        {{ form.mail }}
                     </div>
                     <div class="form-group">
-                        Biografi: {{ form.biografi }}
+                        <label for="id_biografi">Biografi:</label>
+                        {{ form.biografi }}
                     </div>
-
-                        <button type="submit" class="btn btn-primary">Gönder</button>
-                    </form>
-                </div>
+                    <button type="submit" class="btn btn-primary">Gönder</button>
+                </form>
             </div>
         </div>
-    </body>
-    {% endblock %}
+    </div>
+</body>
+{% endblock %}

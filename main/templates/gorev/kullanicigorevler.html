@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<!-- templates/gorev/kullanicigorevler.html -->
+<div class="container mt-4">
+    <h1>Görevlerim</h1>
+    <ul class="list-group">
+        {% for task in tasks %}
+        <li class="list-group-item">
+            {{ task.taskname }}
+            <a href="{% url 'gorev_detay' task.id %}" class="btn btn-info btn-sm ml-2">Detay</a>
+            <a href="{% url 'gorev_tamamla' task.id %}" class="btn btn-success btn-sm ml-2">Görev Tamamla</a>
+        </li>
+        {% empty %}
+            <li class="list-group-item">Hiç göreviniz yok.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

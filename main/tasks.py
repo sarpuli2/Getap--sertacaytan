@@ -54,3 +54,24 @@ def deactivate_user(user_id):
     except Register.DoesNotExist:
         pass
 
+from celery import shared_task
+from datetime import date
+
+from .models import SpecialDay
+
+@shared_task
+def check_special_days():
+    special_days = [
+        (4, 23),  # 23 Nisan
+        (5, 19),  # 19 Mayıs
+        (7, 15),  # 15 Temmuz
+        (8, 30),  # 30 Ağustos
+        (10, 29)  # 29 Ekim
+    ]
+    today = date.today()
+    is_special_day = (today.month, today.day) in special_days
+
+    special_day, created = SpecialDay.objects.get_or_create(id=1)
+    special_day.is_special_day = is_special_day
+    special_day.save()
+

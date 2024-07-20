@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Görev Detayları{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ gorev.taskname }}</h1>
+    <p>{{ gorev.taskcontent }}</p>
+    {% if gorev.taskimage %}
+        <img src="{{ gorev.taskimage.url }}" alt="Görev Resmi" class="img-fluid">
+    {% endif %}
+    {% if gorev.taskfile %}
+        <a href="{{ gorev.taskfile.url }}" class="btn btn-primary mt-3">Görev Dosyasını İndir</a>
+    {% endif %}
+    <a href="{% url 'gorev_tamamla' gorev.id %}" class="btn btn-success mt-3">Görev Tamamla</a>
+</div>
+{% endblock %}

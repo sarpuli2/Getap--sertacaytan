@@ -21,6 +21,7 @@
                     <th scope="col">Stajyer Profil Detay</th>
                     <th scope="col">Stajyer Bilgi Detay</th>
                     <th scope="col">Kullanıcı Sil</th>
+                    <th scope="col">Bitirdiği Görev Sayısı</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,7 +38,7 @@
                             <button type="submit" class="btn btn-danger" onclick="return confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?');">Kullanıcı Sil</button>
                         </form>
                     </td> 
-                    
+                    <td>{{ user.completed_tasks }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

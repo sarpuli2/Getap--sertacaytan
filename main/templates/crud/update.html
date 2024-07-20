@@ -13,15 +13,9 @@
     <div style="width: 70%; margin: auto;">
         <div class="card mt-5">
             <div class="card-header">
-                <h1>{{ user_name }} {{ user_surname }} - Stajyer Bilgi Kayıt</h1>
+                <h1>Stajyer Bilgi Kayıt</h1>
             </div>
             <div class="card-body">           
-                {% if form.instance.image %}
-                    <img src="{{ form.instance.image.url }}" class="img-responsive" width="100px" height="100px">
-                {% else %}
-                    <p>Profil resmi yüklenmemiş.</p>
-                {% endif %}
-                <h3>Profil Resmi Değiştir</h3>
                 <form method="post" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
                     {{ form|crispy }}

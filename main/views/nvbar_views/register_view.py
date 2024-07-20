@@ -11,7 +11,9 @@ def register_view(request):
         mail = request.POST.get('mail')
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
+        # User < Admin < Kurucu
         yetki = 'User'
+        
         
         if password == password2:
             if Register.objects.filter(mail=mail).exists():

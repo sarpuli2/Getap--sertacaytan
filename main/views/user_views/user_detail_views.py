@@ -24,7 +24,7 @@ def user_detail_views(request, user_id):
             stajyerinfo_entry.name = user_name
             stajyerinfo_entry.save()
             messages.success(request, 'İletişim bilgileri başarıyla güncellendi.')
-            return redirect('user_detail', user_id=user_id)  # Burada 'user_detail' URL adını kullanın
+            return redirect('user_detail', user_id=user_id) 
         else:
             messages.error(request, 'Form geçerli değil: ' + str(form.errors))
     else:
